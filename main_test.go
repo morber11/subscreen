@@ -91,3 +91,39 @@ func TestAppendEntriesKey(t *testing.T) {
 		t.Errorf("appendEntriesKey = %q, want %q", got, want)
 	}
 }
+
+func TestOffset(t *testing.T) {
+	base := []Entry{
+		{Index: 1, Start: 10 * time.Second, End: 13 * time.Second},
+		{Index: 2, Start: 20 * time.Second, End: 23 * time.Second},
+	}
+
+	cases := []struct {
+		offset               time.Duration
+		wantStart0, wantEnd0 time.Duration
+		wantStart1, wantEnd1 time.Duration
+	}{
+		{2 * time.Second, 12 * time.Second, 15 * time.Second, 22 * time.Second, 25 * time.Second},
+		{-5 * time.Second, 5 * time.Second, 8 * time.Second, 15 * time.Second, 18 * time.Second},
+		{-15 * time.Second, 0, 0, 5 * time.Second, 8 * time.Second},
+	}
+
+	for _, c := range cases {
+
+		entries := make([]Entry, len(base))
+		copy(entries, base)
+
+		for i := range entries {
+			entries[i].Start = max(0, entries[i].Start+c.offset)
+			entries[i].End = max(0, entries[i].End+c.offset)
+		}
+
+		if entries[0].Start != c.wantStart0 || entries[0].End != c.wantEnd0 {
+			t.Errorf("offset %v: entry 1 got start=%v end=%v, want %v %v", c.offset, entries[0].Start, entries[0].End, c.wantStart0, c.wantEnd0)
+		}
+
+		if entries[1].Start != c.wantStart1 || entries[1].End != c.wantEnd1 {
+			t.Errorf("offset %v: entry 2 got start=%v end=%v, want %v %v", c.offset, entries[1].Start, entries[1].End, c.wantStart1, c.wantEnd1)
+		}
+	}
+}

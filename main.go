@@ -25,6 +25,7 @@ type config struct {
 	start    time.Duration
 	end      time.Duration
 	delay    time.Duration
+	offset   time.Duration
 	format   string
 	ops      bool
 	outDir   string
@@ -57,6 +58,8 @@ func parseFlags() config {
 	flag.BoolVar(ops, "ops", false, "alias for -one-per-subtitle")
 	outDir := flag.String("out-dir", "screenshots", "output directory for screenshots")
 	outJSON := flag.String("out-json", "output.json", "output JSON file path")
+	offset := flag.Duration("offset", 0, "shift subtitle timestamps (e.g. 2s, -500ms)")
+	flag.DurationVar(offset, "o", 0, "alias for -offset")
 	fastSeek := flag.Bool("fast-seek", false, "fast but less accurate seeking (may capture wrong frame)")
 	flag.BoolVar(fastSeek, "fs", false, "alias for -fast-seek")
 	forceYes := flag.Bool("y", false, "yes to all prompts")
@@ -87,6 +90,7 @@ func parseFlags() config {
 		start:    *start,
 		end:      *end,
 		delay:    *delay,
+		offset:   *offset,
 		format:   *format,
 		ops:      *ops,
 		outDir:   *outDir,
@@ -134,6 +138,13 @@ func main() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error parsing SRT: %v\n", err)
 		os.Exit(1)
+	}
+	// if subtitles are out of sync, we can apply an offset
+	if cfg.offset != 0 {
+		for i := range entries {
+			entries[i].Start = max(0, entries[i].Start+cfg.offset)
+			entries[i].End = max(0, entries[i].End+cfg.offset)
+		}
 	}
 
 	// 0755 is rwxr-xr-x

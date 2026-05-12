@@ -34,6 +34,9 @@ If `-srt` is not given, it looks for a `.srt` file next to the video and prompts
 | `-end` | | only process subtitles before this time (e.g. `35m`) |
 | `-delay` | `1s` | interval between screenshots within a subtitle |
 | `-one-per-subtitle` / `-ops` | | take one screenshot per subtitle (at the midpoint) |
+| `-offset` / `-o` | `0` | shift all subtitle timestamps (e.g. `2s`, `-500ms`) |
+| `-fast-seek` / `-fs` | | fast but less accurate seeking (may capture wrong frame) |
+| `-y` | | answer yes to all prompts |
 
 ## Output
 
