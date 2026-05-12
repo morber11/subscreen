@@ -152,7 +152,9 @@ func main() {
 	}
 
 	done := 0
-	printProgress(done, total)
+	var recentDurations [5]time.Duration
+	recentCount := 0
+	printProgress(done, total, 0)
 
 	jsonFile, err := os.Create(cfg.outJSON)
 	if err != nil {
@@ -174,14 +176,30 @@ func main() {
 			filename := fmt.Sprintf("%04d_%s.%s", w.entry.Index, formatTimestamp(t), ext)
 			outPath := filepath.Join(cfg.outDir, filename)
 
+			start := time.Now()
 			if err := TakeScreenshot(cfg.video, t, outPath, cfg.format, cfg.fastSeek); err != nil {
 				fmt.Fprintf(os.Stderr, "\nwarning: screenshot at %s failed: %v\n", formatSRTTime(t), err)
 			} else {
 				shots = append(shots, outPath)
 			}
 
+			recentDurations[recentCount%5] = time.Since(start)
+			recentCount++
+			window := recentCount
+
+			if window > 5 {
+				window = 5
+			}
+			var sum time.Duration
+			for k := 0; k < window; k++ {
+				sum += recentDurations[k]
+			}
+
+			avg := sum / time.Duration(window)
+			eta := avg * time.Duration(total-done-1)
+
 			done++
-			printProgress(done, total)
+			printProgress(done, total, eta)
 		}
 
 		entry := screenshotEntry{
@@ -226,7 +244,7 @@ func formatSRTTime(d time.Duration) string {
 }
 
 // progress bar with an arrow ====>
-func printProgress(done, total int) {
+func printProgress(done, total int, eta time.Duration) {
 	const width = 40
 	var filled int
 
@@ -246,7 +264,28 @@ func printProgress(done, total int) {
 		pct = done * 100 / total
 	}
 
-	fmt.Printf("\r[%s] %d/%d (%d%%)", bar, done, total, pct)
+	if eta > 0 {
+		fmt.Printf("\r[%s] %d/%d (%d%%) ETA %s", bar, done, total, pct, fmtETA(eta))
+	} else {
+		fmt.Printf("\r[%s] %d/%d (%d%%)", bar, done, total, pct)
+	}
+}
+
+func fmtETA(d time.Duration) string {
+	d = d.Round(time.Second)
+	h := int(d.Hours())
+	m := int(d.Minutes()) % 60
+	s := int(d.Seconds()) % 60
+
+	if h > 0 {
+		return fmt.Sprintf("%dh%02dm%02ds", h, m, s)
+	}
+
+	if m > 0 {
+		return fmt.Sprintf("%dm%02ds", m, s)
+	}
+
+	return fmt.Sprintf("%ds", s)
 }
 
 func findSRT(video string) string {

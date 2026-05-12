@@ -62,3 +62,32 @@ func TestFormatSRTTime(t *testing.T) {
 		}
 	}
 }
+
+func TestFmtETA(t *testing.T) {
+	cases := []struct {
+		input time.Duration
+		want  string
+	}{
+		{30 * time.Second, "30s"},
+		{90 * time.Second, "1m30s"},
+		{time.Hour + 2*time.Minute + 3*time.Second, "1h02m03s"},
+		{500 * time.Millisecond, "1s"}, // rounds up to 1s
+		{0, "0s"},
+	}
+
+	for _, c := range cases {
+		got := fmtETA(c.input)
+		if got != c.want {
+			t.Errorf("fmtETA(%v) = %q, want %q", c.input, got, c.want)
+		}
+	}
+}
+
+func TestAppendEntriesKey(t *testing.T) {
+	got := appendEntriesKey([]byte(`{"video":"v","subtitles":"s"}`))
+	want := `{"video":"v","subtitles":"s",` + "\n  \"entries\": ["
+
+	if got != want {
+		t.Errorf("appendEntriesKey = %q, want %q", got, want)
+	}
+}
