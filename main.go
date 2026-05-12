@@ -6,8 +6,10 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 	"time"
 )
 
@@ -165,6 +167,20 @@ func main() {
 		total += len(w.timestamps)
 	}
 
+	// for CTRL+C handling
+	var stopping int32
+	sigCh := make(chan os.Signal, 2)
+	signal.Notify(sigCh, os.Interrupt)
+
+	go func() {
+		<-sigCh
+		atomic.StoreInt32(&stopping, 1)
+		fmt.Fprintln(os.Stderr, "\nwinding down, finishing current screenshot... (ctrl+c again to force quit)")
+		<-sigCh
+		fmt.Fprintln(os.Stderr, "\nforce quit")
+		os.Exit(1)
+	}()
+
 	done := 0
 	var recentDurations [5]time.Duration
 	recentCount := 0
@@ -184,10 +200,16 @@ func main() {
 	first := true
 	entryCount := 0
 	for _, w := range queue {
+		if atomic.LoadInt32(&stopping) == 1 {
+			break
+		}
 		shots := []string{}
 
 		for _, t := range w.timestamps {
-			filename := fmt.Sprintf("%04d_%s.%s", w.entry.Index, formatTimestamp(t), ext)
+			if atomic.LoadInt32(&stopping) == 1 {
+				break
+			}
+			filename := fmt.Sprintf("%d-%s.%s", w.entry.Index, formatTimestamp(t), ext)
 			outPath := filepath.Join(cfg.outDir, filename)
 
 			start := time.Now()
