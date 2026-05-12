@@ -20,15 +20,16 @@ type screenshotEntry struct {
 }
 
 type config struct {
-	video   string
-	srt     string
-	start   time.Duration
-	end     time.Duration
-	delay   time.Duration
-	format  string
-	ops     bool
-	outDir  string
-	outJSON string
+	video    string
+	srt      string
+	start    time.Duration
+	end      time.Duration
+	delay    time.Duration
+	format   string
+	ops      bool
+	outDir   string
+	outJSON  string
+	fastSeek bool
 }
 
 type work struct {
@@ -55,6 +56,8 @@ func parseFlags() config {
 	flag.BoolVar(ops, "ops", false, "alias for -one-per-subtitle")
 	outDir := flag.String("out-dir", "screenshots", "output directory for screenshots")
 	outJSON := flag.String("out-json", "output.json", "output JSON file path")
+	fastSeek := flag.Bool("fast-seek", false, "fast but less accurate seeking (may capture wrong frame)")
+	flag.BoolVar(fastSeek, "fs", false, "alias for -fast-seek")
 	flag.Parse()
 
 	if *video == "" {
@@ -77,15 +80,16 @@ func parseFlags() config {
 	}
 
 	return config{
-		video:   *video,
-		srt:     *srtPath,
-		start:   *start,
-		end:     *end,
-		delay:   *delay,
-		format:  *format,
-		ops:     *ops,
-		outDir:  *outDir,
-		outJSON: *outJSON,
+		video:    *video,
+		srt:      *srtPath,
+		start:    *start,
+		end:      *end,
+		delay:    *delay,
+		format:   *format,
+		ops:      *ops,
+		outDir:   *outDir,
+		outJSON:  *outJSON,
+		fastSeek: *fastSeek,
 	}
 }
 
@@ -170,7 +174,7 @@ func main() {
 			filename := fmt.Sprintf("%04d_%s.%s", w.entry.Index, formatTimestamp(t), ext)
 			outPath := filepath.Join(cfg.outDir, filename)
 
-			if err := TakeScreenshot(cfg.video, t, outPath, cfg.format); err != nil {
+			if err := TakeScreenshot(cfg.video, t, outPath, cfg.format, cfg.fastSeek); err != nil {
 				fmt.Fprintf(os.Stderr, "\nwarning: screenshot at %s failed: %v\n", formatSRTTime(t), err)
 			} else {
 				shots = append(shots, outPath)
@@ -236,7 +240,13 @@ func printProgress(done, total int) {
 	}
 
 	bar += strings.Repeat(" ", width-len(bar))
-	fmt.Printf("\r[%s] %d/%d", bar, done, total)
+
+	pct := 0
+	if total > 0 {
+		pct = done * 100 / total
+	}
+
+	fmt.Printf("\r[%s] %d/%d (%d%%)", bar, done, total, pct)
 }
 
 func findSRT(video string) string {
