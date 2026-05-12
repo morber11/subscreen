@@ -21,11 +21,12 @@ func TakeScreenshot(video string, ts time.Duration, outPath string, format strin
 		if preSeek < 0 {
 			preSeek = 0
 		}
-
+		// second -ss is relative to the pre-seek position, not absolute
+		relSeek := ts - preSeek
 		args = []string{
 			"-ss", fmt.Sprintf("%.3f", preSeek.Seconds()),
 			"-i", video,
-			"-ss", fmt.Sprintf("%.3f", ts.Seconds()),
+			"-ss", fmt.Sprintf("%.3f", relSeek.Seconds()),
 		}
 	}
 
