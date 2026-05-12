@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os/exec"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -45,4 +47,18 @@ func TakeScreenshot(video string, ts time.Duration, outPath string, format strin
 	}
 
 	return nil
+}
+
+func getVideoDuration(path string) (time.Duration, error) {
+	out, err := exec.Command("ffprobe", "-v", "quiet", "-show_entries", "format=duration", "-of", "csv=p=0", path).Output()
+	if err != nil {
+		return 0, err
+	}
+
+	secs, err := strconv.ParseFloat(strings.TrimSpace(string(out)), 64)
+	if err != nil {
+		return 0, err
+	}
+
+	return time.Duration(secs * float64(time.Second)), nil
 }

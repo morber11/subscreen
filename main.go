@@ -34,6 +34,8 @@ type config struct {
 	outJSON  string
 	fastSeek bool
 	forceYes bool
+	trySync  float64
+	autoSync bool
 }
 
 type work struct {
@@ -65,6 +67,8 @@ func parseFlags() config {
 	fastSeek := flag.Bool("fast-seek", false, "fast but less accurate seeking (may capture wrong frame)")
 	flag.BoolVar(fastSeek, "fs", false, "alias for -fast-seek")
 	forceYes := flag.Bool("y", false, "yes to all prompts")
+	trySync := flag.Float64("try-sync", 1.0, "rate multiplier for linear drift correction (e.g. 0.9986)")
+	autoSync := flag.Bool("ts", false, "auto-detect rate from video and SRT duration")
 	flag.Parse()
 
 	if *video == "" {
@@ -86,6 +90,11 @@ func parseFlags() config {
 		os.Exit(1)
 	}
 
+	if *trySync <= 0 {
+		fmt.Fprintln(os.Stderr, "error: -try-sync must be greater than 0")
+		os.Exit(1)
+	}
+
 	return config{
 		video:    *video,
 		srt:      *srtPath,
@@ -99,6 +108,8 @@ func parseFlags() config {
 		outJSON:  *outJSON,
 		fastSeek: *fastSeek,
 		forceYes: *forceYes,
+		trySync:  *trySync,
+		autoSync: *autoSync,
 	}
 }
 
@@ -141,11 +152,21 @@ func main() {
 		fmt.Fprintf(os.Stderr, "error parsing SRT: %v\n", err)
 		os.Exit(1)
 	}
+	// if autoSync is enabled, calculate trySync based on the ratio of video duration to subtitle duration
+	if cfg.autoSync {
+		if dur, err := getVideoDuration(cfg.video); err == nil {
+			// rate = actual video length / where the SRT thinks the video ends;
+			// corrects linear drift from framerate mismatches (e.g. 23.976fps SRT on a 25fps encode)
+			cfg.trySync = float64(dur) / float64(entries[len(entries)-1].End)
+		} else {
+			fmt.Fprintf(os.Stderr, "warning: -ts could not read video duration: %v\n", err)
+		}
+	}
 	// if subtitles are out of sync, we can apply an offset
-	if cfg.offset != 0 {
+	if cfg.offset != 0 || cfg.trySync != 1.0 {
 		for i := range entries {
-			entries[i].Start = max(0, entries[i].Start+cfg.offset)
-			entries[i].End = max(0, entries[i].End+cfg.offset)
+			entries[i].Start = max(0, time.Duration(float64(entries[i].Start)*cfg.trySync)+cfg.offset)
+			entries[i].End = max(0, time.Duration(float64(entries[i].End)*cfg.trySync)+cfg.offset)
 		}
 	}
 
