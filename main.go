@@ -30,6 +30,7 @@ type config struct {
 	outDir   string
 	outJSON  string
 	fastSeek bool
+	forceYes bool
 }
 
 type work struct {
@@ -58,6 +59,7 @@ func parseFlags() config {
 	outJSON := flag.String("out-json", "output.json", "output JSON file path")
 	fastSeek := flag.Bool("fast-seek", false, "fast but less accurate seeking (may capture wrong frame)")
 	flag.BoolVar(fastSeek, "fs", false, "alias for -fast-seek")
+	forceYes := flag.Bool("y", false, "yes to all prompts")
 	flag.Parse()
 
 	if *video == "" {
@@ -67,7 +69,7 @@ func parseFlags() config {
 	}
 
 	if *srtPath == "" {
-		*srtPath = findSRT(*video)
+		*srtPath = findSRT(*video, *forceYes)
 		if *srtPath == "" {
 			fmt.Fprintln(os.Stderr, "error: no -srt given and no .srt file found next to video")
 			os.Exit(1)
@@ -90,6 +92,7 @@ func parseFlags() config {
 		outDir:   *outDir,
 		outJSON:  *outJSON,
 		fastSeek: *fastSeek,
+		forceYes: *forceYes,
 	}
 }
 
@@ -288,12 +291,16 @@ func fmtETA(d time.Duration) string {
 	return fmt.Sprintf("%ds", s)
 }
 
-func findSRT(video string) string {
+func findSRT(video string, forceYes bool) string {
 	dir := filepath.Dir(video)
 	matches, err := filepath.Glob(filepath.Join(dir, "*.srt"))
 
 	if err != nil || len(matches) == 0 {
 		return ""
+	}
+
+	if forceYes {
+		return matches[0]
 	}
 
 	// reuse the same scanner in case there are multiple .srt files
