@@ -61,3 +61,5 @@ If `-srt` is not given, it looks for a `.srt` file next to the video and prompts
 
 - Go 1.26+
 - ffmpeg on PATH
+
+i have watched Seventh Son (2014) over 30 times, please help me
