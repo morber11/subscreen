@@ -11,12 +11,14 @@ import (
 func TakeScreenshot(video string, ts time.Duration, outPath string, format string, fastSeek bool) error {
 	var args []string
 
+	// fast seek
 	if fastSeek {
 		args = []string{
 			"-ss", fmt.Sprintf("%.3f", ts.Seconds()),
 			"-i", video,
 		}
 	} else {
+		// more accurate seek but much slower
 		const preSeekBuf = 5 * time.Second
 		preSeek := ts - preSeekBuf
 
