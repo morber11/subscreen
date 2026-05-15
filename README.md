@@ -21,6 +21,8 @@ subscreen -video <file> [flags]
 
 If `-srt` is not given, it looks for a `.srt` file next to the video and prompts before using it
 
+Reccomend using `-one-per-subtlte` and `-try-sync` nearly every time, as otherwise you will have a large number of screenshots that may be out of sync
+
 ## Flags
 
 | Flag | Default | Description |
@@ -62,4 +64,6 @@ If `-srt` is not given, it looks for a `.srt` file next to the video and prompts
 - Go 1.26+
 - ffmpeg on PATH
 
-i have watched Seventh Son (2014) over 30 times, please help me
+## Known issues
+- Takes screenshots even when it is a quiet moment where no subtitles are shown
+- i have watched Seventh Son (2014) over 30 times, please help me
