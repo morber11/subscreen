@@ -59,8 +59,9 @@ Output screenshots can be found easily via the index in `output.json` - e.g inde
   ]
 }
 ```
+
 Example output
-![](https://files.catbox.moe/fx6g2g.jpg)
+![Example output](https://files.catbox.moe/fx6g2g.jpg)
 
 ## Requirements
 
