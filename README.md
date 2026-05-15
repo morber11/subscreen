@@ -43,6 +43,7 @@ Reccomend using `-one-per-subtitle`/`-ops` and `-try-sync`/`-ts` flags nearly ev
 
 ## Output
 
+Output screenshots can be found easily via the index in `output.json` - e.g index 1 is prefixed with `1-XX-XX-XX-XXX.jpg`, index 2 with `2-XX-XX-XX-XXX.jpg` for easy search
 ```json
 {
   "video": "video.mp4",
@@ -53,7 +54,7 @@ Reccomend using `-one-per-subtitle`/`-ops` and `-try-sync`/`-ts` flags nearly ev
       "start": "00:00:01,000",
       "end": "00:00:04,000",
       "text": "Hello world",
-      "screenshots": ["screenshots/0001_00-00-01-000.jpg"]
+      "screenshots": ["screenshots/1-00-00-01-000.jpg"]
     }
   ]
 }
