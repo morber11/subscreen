@@ -1,4 +1,6 @@
+
 # Subscreen
+
 ffmpeg wrapper that takes screenshots at subtitle timecodes and outputs a JSON file mapping each subtitle to its screenshots.
 
 I made this so I don't need to manually take screenshots from the awful 2014 movie Seventh Son which is an adaption of the novel The Spook's Apprentice by Joseph Delaney
@@ -7,7 +9,7 @@ Should in theory work on every OS but I have not tested outside of Windows
 
 ## Build
 
-```
+```powershell
 .\build.ps1
 ```
 
@@ -15,7 +17,7 @@ Runs `go vet`, tests, and builds to `dist/subscreen.exe`.
 
 ## Usage
 
-```
+```bash
 subscreen -video <file> [flags]
 ```
 
@@ -26,7 +28,7 @@ Reccomend using `-one-per-subtitle`/`-ops` and `-try-sync`/`-ts` flags nearly ev
 ## Flags
 
 | Flag | Default | Description |
-|---|---|---|
+| --- | --- | --- |
 | `-video` | | video file path (required) |
 | `-srt` | | SRT subtitle file |
 | `-format` | `jpeg` | output image format: `jpeg` or `png` |
@@ -44,6 +46,7 @@ Reccomend using `-one-per-subtitle`/`-ops` and `-try-sync`/`-ts` flags nearly ev
 ## Output
 
 Output screenshots can be found easily via the index in `output.json` - e.g index 1 is prefixed with `1-XX-XX-XX-XXX.jpg`, index 2 with `2-XX-XX-XX-XXX.jpg` etc...
+
 ```json
 {
   "video": "video.mp4",
@@ -70,5 +73,6 @@ Example output
 - ffmpeg on PATH
 
 ## Known issues
+
 - Takes screenshots even when it is a quiet moment where no subtitles are shown
 - i have watched Seventh Son (2014) over 30 times, please help me
