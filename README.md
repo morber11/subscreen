@@ -21,7 +21,7 @@ subscreen -video <file> [flags]
 
 If `-srt` is not given, it looks for a `.srt` file next to the video and prompts before using it
 
-Reccomend using `-one-per-subtlte` and `-try-sync` nearly every time, as otherwise you will have a large number of screenshots that may be out of sync
+Reccomend using `-one-per-subtitle`/`-ops` and `-try-sync`/`-ts` flags nearly every time, as otherwise you will have a large number of screenshots that may be out of sync
 
 ## Flags
 
