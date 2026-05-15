@@ -43,7 +43,7 @@ Reccomend using `-one-per-subtitle`/`-ops` and `-try-sync`/`-ts` flags nearly ev
 
 ## Output
 
-Output screenshots can be found easily via the index in `output.json` - e.g index 1 is prefixed with `1-XX-XX-XX-XXX.jpg`, index 2 with `2-XX-XX-XX-XXX.jpg` for easy search
+Output screenshots can be found easily via the index in `output.json` - e.g index 1 is prefixed with `1-XX-XX-XX-XXX.jpg`, index 2 with `2-XX-XX-XX-XXX.jpg` etc...
 ```json
 {
   "video": "video.mp4",
