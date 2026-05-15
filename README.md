@@ -21,6 +21,8 @@ subscreen -video <file> [flags]
 
 If `-srt` is not given, it looks for a `.srt` file next to the video and prompts before using it
 
+Reccomend using `-one-per-subtitle`/`-ops` and `-try-sync`/`-ts` flags nearly every time, as otherwise you will have a large number of screenshots that may be out of sync
+
 ## Flags
 
 | Flag | Default | Description |
@@ -41,6 +43,7 @@ If `-srt` is not given, it looks for a `.srt` file next to the video and prompts
 
 ## Output
 
+Output screenshots can be found easily via the index in `output.json` - e.g index 1 is prefixed with `1-XX-XX-XX-XXX.jpg`, index 2 with `2-XX-XX-XX-XXX.jpg` etc...
 ```json
 {
   "video": "video.mp4",
@@ -51,7 +54,7 @@ If `-srt` is not given, it looks for a `.srt` file next to the video and prompts
       "start": "00:00:01,000",
       "end": "00:00:04,000",
       "text": "Hello world",
-      "screenshots": ["screenshots/0001_00-00-01-000.jpg"]
+      "screenshots": ["screenshots/1-00-00-01-000.jpg"]
     }
   ]
 }
@@ -62,4 +65,6 @@ If `-srt` is not given, it looks for a `.srt` file next to the video and prompts
 - Go 1.26+
 - ffmpeg on PATH
 
-i have watched Seventh Son (2014) over 30 times, please help me
+## Known issues
+- Takes screenshots even when it is a quiet moment where no subtitles are shown
+- i have watched Seventh Son (2014) over 30 times, please help me
